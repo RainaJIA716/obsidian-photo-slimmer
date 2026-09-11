@@ -1,0 +1,19 @@
+{
+  "name": "photo-slimmer",
+  "version": "1.0.0",
+  "description": "Shrink oversized photos in the background right after they land in the vault.",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+    "harness": "esbuild harness/entry.ts --bundle --format=esm --outfile=harness/compress.mjs"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "esbuild": "^0.20.0",
+    "obsidian": "latest",
+    "typescript": "^5.4.0"
+  }
+}

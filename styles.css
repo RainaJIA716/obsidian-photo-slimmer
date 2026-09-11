@@ -1,0 +1,130 @@
+/* All static styling lives here. The only value set from code is the progress
+   width, and that goes through a CSS variable via setCssProps. */
+
+.photo-slimmer-modal {
+	--photo-slimmer-progress: 0%;
+}
+
+.photo-slimmer-modal h2 {
+	margin-top: 0;
+}
+
+.photo-slimmer-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 20px;
+	margin: 14px 0 18px;
+}
+
+.photo-slimmer-stat-value {
+	font-size: 1.5em;
+	font-weight: 600;
+	line-height: 1.2;
+	font-variant-numeric: tabular-nums;
+}
+
+.photo-slimmer-stat-label {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.photo-slimmer-note {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	margin: 8px 0;
+}
+
+.photo-slimmer-list {
+	max-height: 220px;
+	overflow-y: auto;
+	margin: 8px 0;
+}
+
+.photo-slimmer-row {
+	display: flex;
+	gap: 12px;
+	justify-content: space-between;
+	padding: 3px 0;
+	font-size: var(--font-ui-smaller);
+	border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.photo-slimmer-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.photo-slimmer-size {
+	color: var(--text-muted);
+	flex-shrink: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.photo-slimmer-reasoned .photo-slimmer-name {
+	flex-shrink: 0;
+	max-width: 45%;
+}
+
+.photo-slimmer-reason {
+	color: var(--text-muted);
+	text-align: right;
+}
+
+.photo-slimmer-more {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	padding-top: 6px;
+}
+
+.photo-slimmer-details {
+	margin: 10px 0;
+}
+
+.photo-slimmer-details summary {
+	cursor: pointer;
+	font-weight: 500;
+}
+
+.photo-slimmer-failed summary {
+	color: var(--text-error);
+}
+
+.photo-slimmer-counter {
+	font-variant-numeric: tabular-nums;
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+}
+
+.photo-slimmer-track {
+	height: 6px;
+	border-radius: 3px;
+	background: var(--background-modifier-border);
+	overflow: hidden;
+	margin: 8px 0;
+}
+
+.photo-slimmer-bar {
+	height: 100%;
+	width: var(--photo-slimmer-progress);
+	background: var(--interactive-accent);
+	transition: width 0.15s linear;
+}
+
+.photo-slimmer-current {
+	font-size: var(--font-ui-smaller);
+	color: var(--text-muted);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.photo-slimmer-report .photo-slimmer-list {
+	max-height: 260px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.photo-slimmer-bar {
+		transition: none;
+	}
+}
