@@ -1,0 +1,124 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" width="1000" height="700" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <style>
+    .card{fill:#fdfcfa;stroke:#e3ddd2;stroke-width:1.5}
+    .head{fill:#efe9dd}
+    .t{fill:#2f2a24}.m{fill:#8b8177}.accent{fill:#8a7355}
+    .big{font-size:22px;font-weight:600}
+    .h{font-size:15px;font-weight:600}
+    .b{font-size:12.5px}.s{font-size:11px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+    .step{font-size:10.5px;font-weight:700;letter-spacing:.12em}
+    .ok{fill:#4b7a4e}.warn{fill:#a4553a}
+  </style>
+  <defs>
+    <marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 .5 L8 4 L0 7.5z" fill="#8a7355"/></marker>
+    <marker id="gr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 .5 L8 4 L0 7.5z" fill="#c9c1b4"/></marker>
+  </defs>
+  <rect width="1000" height="700" fill="#fff"/>
+
+  <text class="t" x="30" y="42" font-size="19" font-weight="600">Photo Slimmer — how a run goes</text>
+  <text class="b m" x="30" y="64">You start it. It says what it will do, does it one image at a time, and accounts for every file at the end.</text>
+
+  <!-- STEP 1 -->
+  <text class="step accent" x="30" y="106">STEP 1</text>
+  <text class="h t" x="30" y="128">Press the</text>
+  <text class="h t" x="30" y="147">ribbon icon</text>
+  <text class="b m" x="30" y="169">Nothing runs</text>
+  <text class="b m" x="30" y="186">on its own.</text>
+  <rect x="30" y="202" width="58" height="132" rx="9" class="card"/>
+  <circle cx="59" cy="226" r="10" fill="none" stroke="#c3bbae" stroke-width="1.6"/>
+  <circle cx="59" cy="258" r="10" fill="none" stroke="#c3bbae" stroke-width="1.6"/>
+  <rect x="45" y="276" width="28" height="28" rx="7" fill="#efe9dd" stroke="#8a7355" stroke-width="1.6"/>
+  <rect x="51" y="285" width="16" height="11" rx="2" fill="none" stroke="#8a7355" stroke-width="1.6"/>
+  <line x1="53.5" y1="290.5" x2="64.5" y2="290.5" stroke="#8a7355" stroke-width="1.6"/>
+  <circle cx="59" cy="322" r="10" fill="none" stroke="#c3bbae" stroke-width="1.6"/>
+  <text class="s m" x="30" y="352">ribbon</text>
+  <path d="M100 268 H166" stroke="#c9c1b4" stroke-width="1.6" fill="none" marker-end="url(#gr)"/>
+
+  <!-- STEP 2 -->
+  <text class="step accent" x="190" y="106">STEP 2</text>
+  <text class="h t" x="190" y="128">See exactly what will happen</text>
+  <text class="b m" x="190" y="150">Counts, total size, and what becomes of the</text>
+  <text class="b m" x="190" y="167">originals — before anything is touched.</text>
+
+  <rect x="190" y="186" width="390" height="196" rx="11" class="card"/>
+  <rect x="190" y="186" width="390" height="32" rx="11" class="head"/>
+  <rect x="190" y="207" width="390" height="11" class="head"/>
+  <text class="h t" x="208" y="208">Compress images to WebP</text>
+  <text class="big t" x="208" y="252">1771</text><text class="s m" x="208" y="267">Images</text>
+  <text class="big t" x="312" y="252">881 MB</text><text class="s m" x="312" y="267">Total size</text>
+  <text class="big t" x="446" y="252">24.8 MB</text><text class="s m" x="446" y="267">Largest</text>
+  <text class="b m" x="208" y="292">Each image is replaced by a WebP of the same</text>
+  <text class="b m" x="208" y="309">name, and the original goes to the system trash.</text>
+  <line x1="208" y1="322" x2="562" y2="322" stroke="#ece7de"/>
+  <text class="mono t" x="208" y="340">Untitled (4).png</text><text class="mono m" x="420" y="340" text-anchor="end">24.8 MB</text>
+  <text class="mono t" x="208" y="358">scan-0042.png</text><text class="mono m" x="420" y="358" text-anchor="end">16.6 MB</text>
+  <rect x="464" y="346" width="98" height="24" rx="6" fill="#8a7355"/>
+  <text class="b" x="513" y="362" text-anchor="middle" fill="#fff">Compress</text>
+
+  <path d="M592 284 H604" stroke="#c9c1b4" stroke-width="1.6" fill="none" marker-end="url(#gr)"/>
+
+  <!-- STEP 3 -->
+  <text class="step accent" x="616" y="106">STEP 3</text>
+  <text class="h t" x="616" y="128">One image at a time</text>
+  <text class="b m" x="616" y="150">Serial, so the window stays responsive</text>
+  <text class="b m" x="616" y="167">and Stop works at any moment.</text>
+
+  <rect x="616" y="186" width="354" height="196" rx="11" class="card"/>
+  <rect x="616" y="186" width="354" height="32" rx="11" class="head"/>
+  <rect x="616" y="207" width="354" height="11" class="head"/>
+  <text class="h t" x="634" y="208">Compressing</text>
+  <text class="mono m" x="634" y="244">842 / 1771</text>
+  <rect x="634" y="256" width="318" height="8" rx="4" fill="#ece7de"/>
+  <rect x="634" y="256" width="151" height="8" rx="4" fill="#8a7355"/>
+  <text class="mono t" x="634" y="284">scan-0042.png</text>
+  <line x1="634" y1="300" x2="952" y2="300" stroke="#ece7de"/>
+  <text class="s m" x="634" y="319">For every image, in this order:</text>
+  <text class="b t" x="634" y="339">1  bytes rewritten in place</text>
+  <text class="b t" x="634" y="357">2  renamed to .webp</text>
+  <text class="b t" x="806" y="339">3  every link moved</text>
+  <text class="b t" x="806" y="357">4  original to the trash</text>
+
+  <!-- what happens to one image -->
+  <rect x="30" y="416" width="550" height="196" rx="11" class="card"/>
+  <text class="h t" x="50" y="444">What happens to one image</text>
+  <rect x="50" y="458" width="190" height="48" rx="7" fill="#fff" stroke="#ded7ca"/>
+  <text class="mono t" x="62" y="478">photo.png</text>
+  <text class="s m" x="62" y="495">4.0 MB   2982 x 1880</text>
+  <text class="s accent" x="286" y="474" text-anchor="middle">in place</text>
+  <path d="M250 486 H322" stroke="#8a7355" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+  <rect x="330" y="458" width="230" height="48" rx="7" fill="#fff" stroke="#8a7355"/>
+  <text class="mono t" x="342" y="478">photo.webp</text>
+  <text class="s ok" x="342" y="495">330 KB   2560 x 1613   92% smaller</text>
+  <text class="b m" x="50" y="532">Links follow it — in notes, and inside fenced code blocks, which Obsidian's</text>
+  <text class="b m" x="50" y="549">own link index does not see:</text>
+  <rect x="50" y="560" width="510" height="40" rx="7" fill="#faf8f4" stroke="#ece7de"/>
+  <text class="mono t" x="64" y="578">![[photo.png]]</text>
+  <path d="M178 574 H202" stroke="#8a7355" stroke-width="1.5" fill="none" marker-end="url(#ar)"/>
+  <text class="mono t" x="212" y="578">![[photo.webp]]</text>
+  <text class="mono t" x="64" y="594">```gallery ![[photo.png]]</text>
+  <path d="M256 590 H280" stroke="#8a7355" stroke-width="1.5" fill="none" marker-end="url(#ar)"/>
+  <text class="mono t" x="290" y="594">![[photo.webp]]</text>
+
+  <!-- STEP 4 -->
+  <text class="step accent" x="616" y="416">STEP 4</text>
+  <text class="h t" x="616" y="438">A report that explains itself</text>
+  <rect x="616" y="452" width="354" height="160" rx="11" class="card"/>
+  <rect x="616" y="452" width="354" height="30" rx="11" class="head"/>
+  <rect x="616" y="471" width="354" height="11" class="head"/>
+  <text class="h t" x="634" y="473">Done</text>
+  <text class="big t" x="634" y="508">1771</text><text class="s m" x="634" y="523">Compressed</text>
+  <text class="big t" x="726" y="508">690 MB</text><text class="s m" x="726" y="523">Saved</text>
+  <text class="big t" x="832" y="508">78%</text><text class="s m" x="832" y="523">Smaller by</text>
+  <text class="big t" x="908" y="508">83s</text><text class="s m" x="908" y="523">Took</text>
+  <line x1="634" y1="538" x2="952" y2="538" stroke="#ece7de"/>
+  <text class="b warn" x="634" y="558">Left alone (74)</text>
+  <text class="mono t" x="634" y="578">old-scan.png</text>
+  <text class="s m" x="952" y="578" text-anchor="end">could not be decoded</text>
+  <text class="mono t" x="634" y="596">affinity-7.jpeg</text>
+  <text class="s m" x="952" y="596" text-anchor="end">"affinity-7.webp" already exists</text>
+
+  <line x1="30" y1="642" x2="970" y2="642" stroke="#ece7de"/>
+  <text class="b m" x="30" y="666">No file is created in the vault, so nothing else can rename one mid-flight — the copy of the original lives outside the</text>
+  <text class="b m" x="30" y="684">file index until it reaches the system trash. Any failure puts the image, its bytes and every note back the way they were.</text>
+</svg>

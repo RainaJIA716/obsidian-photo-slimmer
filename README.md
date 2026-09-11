@@ -4,6 +4,8 @@ Converts the oversized images already sitting in your vault to WebP, in one pass
 
 On a real 8,500-image vault it turned 681 MB of PNGs into 63 MB across five runs, with no broken link and no file left mislabelled.
 
+![How a Photo Slimmer run goes](docs/how-it-works.svg)
+
 ## What it does
 
 Press the ribbon icon. You get a preview of exactly what is about to happen — how many images, how big, and what becomes of the originals — and nothing is touched until you confirm.
