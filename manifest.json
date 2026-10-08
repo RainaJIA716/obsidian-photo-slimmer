@@ -1,7 +1,7 @@
 {
   "id": "photo-slimmer",
   "name": "Photo Slimmer",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "minAppVersion": "1.1.0",
   "description": "Convert oversized images in your vault to WebP in one pass, updating every link for you, including links written inside code blocks.",
   "author": "RainaJIA716",

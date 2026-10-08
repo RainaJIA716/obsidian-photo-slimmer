@@ -1,5 +1,6 @@
 import { App, Modal, Notice, Setting, TFile } from "obsidian";
-import type { RunReport } from "./run";
+import { KIND_TITLES } from "./run";
+import type { Left, LeftKind, RunReport } from "./run";
 import { formatBytes } from "./settings";
 import type { SlimmerSettings } from "./settings";
 
@@ -17,6 +18,8 @@ export class PreviewModal extends Modal {
 		private readonly files: TFile[],
 		/** How many candidates there are in all, which may be more. */
 		private readonly total: number,
+		/** Images held back because an earlier run already left them alone. */
+		private readonly remembered: number,
 		private readonly settings: SlimmerSettings,
 		private readonly onConfirm: () => void
 	) {
@@ -42,12 +45,21 @@ export class PreviewModal extends Modal {
 			});
 		}
 
+		if (this.remembered > 0) {
+			contentEl.createEl("p", {
+				cls: "photo-slimmer-note",
+				text: `${this.remembered} more ${this.remembered === 1 ? "image was" : "images were"} left alone by an earlier run and ${this.remembered === 1 ? "has" : "have"} not changed since, so ${this.remembered === 1 ? "it is" : "they are"} not tried again. Editing an image or changing the quality settings brings it back; the command "Retry images left alone earlier" brings back all of them.`,
+			});
+		}
+
+		const naming =
+			"Each image is replaced by a WebP of the same name — or, if that name is already taken by a different image, the same name with -1 added.";
 		contentEl.createEl("p", {
 			cls: "photo-slimmer-note",
 			text:
 				this.settings.originalHandling === "trash"
-					? "Each image is replaced by a WebP of the same name and the original goes to the system trash. On an iCloud vault the trash still counts against your storage for 30 days, so the space is not actually freed until then."
-					: "Each image is replaced by a WebP of the same name. No copy of the original is kept.",
+					? `${naming} The original goes to the system trash. On an iCloud vault the trash still counts against your storage for 30 days, so the space is not actually freed until then.`
+					: `${naming} No copy of the original is kept.`,
 		});
 		contentEl.createEl("p", {
 			cls: "photo-slimmer-note",
@@ -171,7 +183,19 @@ export class ReportModal extends Modal {
 
 		// Failures first: they are the part that may need something done.
 		this.section("Could not be replaced", failed, "photo-slimmer-failed", true);
-		this.section("Left alone", skipped, "photo-slimmer-skipped", false);
+
+		// A flat list of two hundred lines with the reasons interleaved hides
+		// the one line that matters. Grouped, it reads as "95 would not get
+		// smaller, 2 are not really PNGs" — and the rare kinds are visible.
+		for (const [kind, items] of groupByKind(skipped)) {
+			this.section(KIND_TITLES[kind], items, "photo-slimmer-skipped", false);
+		}
+		if (skipped.some((item) => item.kind === "not-smaller" || item.kind === "wrong-format")) {
+			contentEl.createEl("p", {
+				cls: "photo-slimmer-note",
+				text: 'Images left alone are not tried again until they change or the quality settings do. The command "Retry images left alone earlier" brings them all back.',
+			});
+		}
 
 		if (done.length > 0) {
 			const details = contentEl.createEl("details", { cls: "photo-slimmer-details" });
@@ -179,7 +203,10 @@ export class ReportModal extends Modal {
 			const list = details.createDiv({ cls: "photo-slimmer-list" });
 			for (const item of done) {
 				const row = list.createDiv({ cls: "photo-slimmer-row" });
-				row.createSpan({ cls: "photo-slimmer-name", text: item.name });
+				row.createSpan({
+					cls: "photo-slimmer-name",
+					text: item.renamedFrom ? `${item.name} (was ${item.renamedFrom})` : item.name,
+				});
 				row.createSpan({
 					cls: "photo-slimmer-size",
 					text: `${formatBytes(item.before)} → ${formatBytes(item.after)}`,
@@ -228,14 +255,18 @@ export class ReportModal extends Modal {
 			lines.push("", "Could not be replaced:");
 			for (const f of failed) lines.push(`  ${f.path} — ${f.reason}`);
 		}
-		if (skipped.length) {
-			lines.push("", "Left alone:");
-			for (const s of skipped) lines.push(`  ${s.path} — ${s.reason}`);
+		for (const [kind, items] of groupByKind(skipped)) {
+			lines.push("", `Left alone — ${KIND_TITLES[kind].toLowerCase()} (${items.length}):`);
+			for (const s of items) lines.push(`  ${s.path} — ${s.reason}`);
 		}
 		if (done.length) {
 			lines.push("", "Compressed:");
-			for (const d of done)
-				lines.push(`  ${d.path} — ${formatBytes(d.before)} → ${formatBytes(d.after)} (${d.dimensions})`);
+			for (const d of done) {
+				const was = d.renamedFrom ? `, was ${d.renamedFrom}` : "";
+				lines.push(
+					`  ${d.path} — ${formatBytes(d.before)} → ${formatBytes(d.after)} (${d.dimensions}${was})`
+				);
+			}
 		}
 		return lines.join("\n");
 	}
@@ -243,6 +274,14 @@ export class ReportModal extends Modal {
 	onClose(): void {
 		this.contentEl.empty();
 	}
+}
+
+/** Skipped images by kind, in the order the kinds are declared in `KIND_TITLES`. */
+function groupByKind(items: Left[]): [LeftKind, Left[]][] {
+	const groups = new Map<LeftKind, Left[]>();
+	for (const kind of Object.keys(KIND_TITLES) as LeftKind[]) groups.set(kind, []);
+	for (const item of items) groups.get(item.kind)?.push(item);
+	return [...groups].filter(([, list]) => list.length > 0);
 }
 
 function stat(parent: HTMLElement, label: string, value: string): void {

@@ -18,14 +18,19 @@ export interface SlimmerSettings {
 	 * A whole-vault pass over thousands of files is an all-or-nothing bet on a
 	 * build you have not watched run yet. A cap turns it into a batch you can
 	 * inspect before deciding to do the rest — and because candidates are taken
-	 * biggest-first and a converted file is never a candidate again, repeated
-	 * runs simply work down the list.
+	 * biggest-first, a converted file is never a candidate again and one left
+	 * alone is remembered, repeated runs simply work down the list.
 	 */
 	maxPerRun: number;
 	/** Longest edge of the output, in pixels. 0 keeps the original size. */
 	maxEdge: number;
-	/** WebP encoder quality, 1-100. */
+	/** WebP encoder quality for a PNG source, 1-100. 100 is lossless. */
 	quality: number;
+	/**
+	 * WebP encoder quality for a JPEG source, 1-100. Lower than the PNG one
+	 * because a JPEG is already lossy; see `CompressOptions.jpegQuality`.
+	 */
+	jpegQuality: number;
 	/** Leave the file alone unless it shrinks by at least this much, in percent. */
 	minSavingPercent: number;
 	originalHandling: OriginalHandling;
@@ -38,6 +43,7 @@ export const DEFAULT_SETTINGS: SlimmerSettings = {
 	maxPerRun: 50,
 	maxEdge: 2560,
 	quality: 90,
+	jpegQuality: 80,
 	minSavingPercent: 10,
 	originalHandling: "trash",
 	excludedFolders: "",

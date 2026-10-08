@@ -1,6 +1,6 @@
 {
   "name": "photo-slimmer",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "description": "Shrink oversized photos in the background right after they land in the vault.",
   "main": "main.js",
   "scripts": {

@@ -112,11 +112,10 @@
   <text class="big t" x="832" y="508">78%</text><text class="s m" x="832" y="523">Smaller by</text>
   <text class="big t" x="908" y="508">83s</text><text class="s m" x="908" y="523">Took</text>
   <line x1="634" y1="538" x2="952" y2="538" stroke="#ece7de"/>
-  <text class="b warn" x="634" y="558">Left alone (74)</text>
+  <text class="b warn" x="634" y="558">Not really the format its name says (2)</text>
   <text class="mono t" x="634" y="578">old-scan.png</text>
-  <text class="s m" x="952" y="578" text-anchor="end">could not be decoded</text>
-  <text class="mono t" x="634" y="596">affinity-7.jpeg</text>
-  <text class="s m" x="952" y="596" text-anchor="end">"affinity-7.webp" already exists</text>
+  <text class="s m" x="952" y="578" text-anchor="end">really a TIFF named .png</text>
+  <text class="b warn" x="634" y="600">Would not get smaller (72)  ▸</text>
 
   <line x1="30" y1="642" x2="970" y2="642" stroke="#ece7de"/>
   <text class="b m" x="30" y="666">No file is created in the vault, so nothing else can rename one mid-flight — the copy of the original lives outside the</text>

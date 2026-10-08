@@ -12,12 +12,12 @@ Press the ribbon icon. You get a preview of exactly what is about to happen — 
 
 Each image is then converted in place:
 
-- The file keeps its name and changes extension: `photo.png` → `photo.webp`.
+- The file keeps its name and changes extension: `photo.png` → `photo.webp`. If a different image already has that name, it becomes `photo-1.webp` instead of being skipped.
 - Every link that pointed at it is rewritten, including the ones in fenced code blocks.
 - The original goes to the system trash under its own name, so it is recoverable.
 - Anything that cannot be converted **safely** is left exactly as it was and listed at the end with the reason.
 
-When the run finishes you get a report: how many, how much smaller, and — named, with a reason — every image that was skipped or could not be replaced.
+When the run finishes you get a report: how many, how much smaller, and — named, grouped by reason — every image that was skipped or could not be replaced.
 
 ## Why you might want it over the alternatives
 
@@ -36,10 +36,13 @@ Two things it is careful about, both learned from live vaults:
 | Size threshold | 200 KB | Images at or below this are never touched |
 | Images per run | 50 | Stop after this many, biggest first. 0 does the whole vault |
 | Longest edge | 2560 px | Larger images are scaled down. 0 keeps the original size |
-| WebP quality | 90 | Higher keeps more detail and produces bigger files |
+| WebP quality for PNG | 90 | Higher keeps more detail and produces bigger files. 100 is lossless |
+| WebP quality for JPEG | 80 | Lower than for PNG, because a JPEG has already been compressed once |
 | Minimum saving | 10% | Leave an image alone unless converting saves at least this much |
 | The original file | System trash | Or replace it, keeping no copy |
 | Excluded folders | — | One path per line; these and their subfolders are never touched |
+
+A PNG that comes out no smaller is tried once more as lossless WebP, which is pixel-for-pixel identical and often much smaller for flat screenshots.
 
 A very tall image is scaled by its short edge instead, which never goes below 1080 px — capping the long edge alone would turn a long screenshot into an unreadable sliver.
 
@@ -54,9 +57,13 @@ A very tall image is scaled by its short edge instead, which never goes below 10
 Every one of these is a normal outcome, reported by name:
 
 - the WebP came out no smaller than the original
-- the image could not be decoded (a file with the wrong extension, for example — a TIFF named `.png`)
-- a `.webp` of that name already exists
+- the file is not what its name says — a TIFF named `.png`, for example, which Obsidian cannot display either
+- the image could not be decoded
 - the note holding the link changed while the image was being converted
+
+An image left alone for one of the first three reasons is remembered, and later runs skip it until the image itself or the quality settings change — so a run capped at 50 images always spends them on images it has not tried yet. The command **Retry images left alone earlier** brings them all back.
+
+Why a `.webp` name can already be taken: paste-renaming plugins number new images by checking only the exact name they are about to use. Once `photo-3.png` has become `photo-3.webp`, the name `photo-3.png` looks free, and the next pasted image gets it — a different picture with the same stem. Photo Slimmer gives that one `photo-3-1.webp`, a name not used anywhere else in the vault, so no short link becomes ambiguous.
 
 In the last case nothing is half-done: the image, its bytes and every note are put back the way they were before the failure.
 

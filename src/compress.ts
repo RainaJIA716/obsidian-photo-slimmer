@@ -14,8 +14,19 @@
 export interface CompressOptions {
 	/** Longest edge of the output, in pixels. 0 means never scale down. */
 	maxEdge: number;
-	/** WebP encoder quality, 1-100. */
+	/** WebP encoder quality for a PNG source, 1-100. */
 	quality: number;
+	/**
+	 * WebP encoder quality for a JPEG source, 1-100.
+	 *
+	 * Separate because the two sources behave nothing alike. A PNG is lossless,
+	 * so even quality 90 throws away a great deal it never needed. A JPEG has
+	 * already been through a lossy encoder: re-encoding it at 90 asks WebP to
+	 * preserve the JPEG's own artefacts, and in a real vault 95 of 203 skipped
+	 * images were JPEGs whose WebP at 90 came out *bigger* than the original.
+	 * At 80 the same files shrank by 20-35%.
+	 */
+	jpegQuality: number;
 	/** Give up unless the output is at least this much smaller, in percent. */
 	minSavingPercent: number;
 }
@@ -33,7 +44,12 @@ export interface CompressResult {
  * failure: the contract is that an image is either made meaningfully smaller or
  * not touched at all.
  */
-export type SkipReason = "unsupported-format" | "undecodable" | "encode-failed" | "not-smaller";
+export type SkipReason =
+	| "unsupported-format"
+	| "wrong-format"
+	| "undecodable"
+	| "encode-failed"
+	| "not-smaller";
 
 export type CompressOutcome =
 	| { ok: true; result: CompressResult }
@@ -79,6 +95,34 @@ export async function canEncodeWebp(): Promise<boolean> {
 	}
 }
 
+/** What a file really is, judged by its first bytes rather than its name. */
+export type SniffedFormat = "png" | "jpeg" | "webp" | "gif" | "bmp" | "tiff" | "heic" | "unknown";
+
+/** Formats that a Chromium-based Obsidian cannot decode at all. */
+const UNDISPLAYABLE: Partial<Record<SniffedFormat, string>> = {
+	tiff: "TIFF",
+	heic: "HEIC",
+};
+
+export function sniffFormat(bytes: ArrayBuffer): SniffedFormat {
+	const head = new Uint8Array(bytes, 0, Math.min(bytes.byteLength, 16));
+	const at = (offset: number, ...values: number[]) =>
+		values.every((value, i) => head[offset + i] === value);
+	const ascii = (offset: number, text: string) =>
+		at(offset, ...Array.from(text, (c) => c.charCodeAt(0)));
+
+	if (at(0, 0x89, 0x50, 0x4e, 0x47)) return "png";
+	if (at(0, 0xff, 0xd8, 0xff)) return "jpeg";
+	if (ascii(0, "RIFF") && ascii(8, "WEBP")) return "webp";
+	if (ascii(0, "GIF8")) return "gif";
+	if (ascii(0, "BM")) return "bmp";
+	if (at(0, 0x49, 0x49, 0x2a, 0x00) || at(0, 0x4d, 0x4d, 0x00, 0x2a)) return "tiff";
+	if (ascii(4, "ftyp") && ["heic", "heix", "hevc", "mif1", "msf1"].some((b) => ascii(8, b))) {
+		return "heic";
+	}
+	return "unknown";
+}
+
 export async function compressImage(
 	bytes: ArrayBuffer,
 	extension: string,
@@ -86,6 +130,19 @@ export async function compressImage(
 ): Promise<CompressOutcome> {
 	const mime = mimeForExtension(extension);
 	if (!mime) return { ok: false, reason: "unsupported-format", detail: extension };
+
+	// A file whose name lies about its contents fails to decode with a bare
+	// "InvalidStateError", which tells the reader nothing they can act on. Say
+	// what it really is, before spending a decode on it.
+	const sniffed = sniffFormat(bytes);
+	const real = UNDISPLAYABLE[sniffed];
+	if (real) {
+		return {
+			ok: false,
+			reason: "wrong-format",
+			detail: `it is really a ${real} file named .${extension.toLowerCase()}, which Obsidian cannot display either`,
+		};
+	}
 
 	let bitmap: ImageBitmap;
 	try {
@@ -98,23 +155,25 @@ export async function compressImage(
 		const sourceWidth = bitmap.width;
 		const sourceHeight = bitmap.height;
 		const [width, height] = fit(sourceWidth, sourceHeight, options.maxEdge);
+		const budget = bytes.byteLength * (1 - options.minSavingPercent / 100);
+		const quality = mime === "image/jpeg" ? options.jpegQuality : options.quality;
 
-		let blob: Blob | null;
-		try {
-			blob = await render(bitmap, width, height, options.quality);
-		} catch (error) {
-			return { ok: false, reason: "encode-failed", detail: String(error) };
-		}
-		if (!blob || blob.size === 0) {
-			return { ok: false, reason: "encode-failed", detail: "the encoder returned nothing" };
-		}
-		if (blob.type !== OUTPUT_MIME) {
-			// Chromium quietly hands back a PNG when it cannot encode the type
-			// asked for, which would put PNG bytes under a .webp name.
-			return { ok: false, reason: "encode-failed", detail: "this build cannot encode WebP" };
+		const lossy = await encode(bitmap, width, height, quality);
+		if (!lossy.ok) return lossy;
+		let blob = lossy.blob;
+
+		// A PNG gets a second chance as lossless WebP. Flat-colour screenshots
+		// are where lossy WebP does worst and lossless does best: one that came
+		// out no smaller at quality 90 went from 323 KB to 96 KB losslessly.
+		// It costs nothing in fidelity, and only the files that already failed
+		// pay for the extra encode. A JPEG never gets it — lossless would only
+		// faithfully preserve its artefacts, at several times the size.
+		if (blob.size > budget && mime === "image/png" && quality < 100) {
+			const lossless = await encode(bitmap, width, height, 100);
+			if (lossless.ok && lossless.blob.size < blob.size) blob = lossless.blob;
 		}
 
-		if (blob.size > bytes.byteLength * (1 - options.minSavingPercent / 100)) {
+		if (blob.size > budget) {
 			return { ok: false, reason: "not-smaller" };
 		}
 
@@ -137,6 +196,35 @@ export async function compressImage(
 	} finally {
 		bitmap.close();
 	}
+}
+
+/**
+ * One encode, checked for the two ways the encoder can quietly let us down.
+ *
+ * Quality 100 means lossless: Chromium switches the WebP encoder into lossless
+ * mode at exactly 1.0.
+ */
+async function encode(
+	bitmap: ImageBitmap,
+	width: number,
+	height: number,
+	quality: number
+): Promise<{ ok: true; blob: Blob } | { ok: false; reason: SkipReason; detail: string }> {
+	let blob: Blob | null;
+	try {
+		blob = await render(bitmap, width, height, quality);
+	} catch (error) {
+		return { ok: false, reason: "encode-failed", detail: String(error) };
+	}
+	if (!blob || blob.size === 0) {
+		return { ok: false, reason: "encode-failed", detail: "the encoder returned nothing" };
+	}
+	if (blob.type !== OUTPUT_MIME) {
+		// Chromium quietly hands back a PNG when it cannot encode the type
+		// asked for, which would put PNG bytes under a .webp name.
+		return { ok: false, reason: "encode-failed", detail: "this build cannot encode WebP" };
+	}
+	return { ok: true, blob };
 }
 
 /**

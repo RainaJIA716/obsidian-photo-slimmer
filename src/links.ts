@@ -1,17 +1,19 @@
 import { App, TFile } from "obsidian";
+import { parseLinks } from "./linkindex";
 import type { LinkIndex } from "./linkindex";
 
 export interface Reference {
 	notePath: string;
 	/** The link exactly as it appears in the note, e.g. `![[Attachments/a.png|300]]`. */
 	original: string;
-	/** What it should become once the extension changes. */
+	/** What it should become once the file has its new name. */
 	replacement: string;
 }
 
 /**
- * Rewrites only the extension inside a link, leaving the rest of the text byte
- * for byte as the author wrote it.
+ * Rewrites only the end of the filename inside a link — the extension, plus a
+ * suffix when the image needs a new name — leaving the rest of the text byte for
+ * byte as the author wrote it.
  *
  * This is deliberately not `generateMarkdownLink`. Regenerating a link would
  * normalise it — a shortest-form wikilink could come back as a full path, a
@@ -20,23 +22,30 @@ export interface Reference {
  * including percent-encoding, because it is the only thing that actually
  * changed.
  *
+ * The suffix is appended to the stem as written, not to a decoded copy of it,
+ * so a percent-encoded link stays percent-encoded. That is safe only because
+ * the suffix is plain ASCII with nothing to escape; {@link webpTarget} in
+ * replace.ts only ever produces `-<digits>`.
+ *
  * Returns null when nothing needs to change, which includes the extensionless
  * `![[photo]]` form: that resolves by basename and keeps working after the
  * rename on its own.
  */
-export function retargetExtension(
+export function retargetLink(
 	original: string,
 	oldExtension: string,
-	newExtension: string
+	newExtension: string,
+	suffix = ""
 ): string | null {
 	const bounds = targetBounds(original);
 	if (!bounds) return null;
 
 	const target = original.slice(bounds.start, bounds.end);
-	const suffix = `.${oldExtension.toLowerCase()}`;
-	if (!target.toLowerCase().endsWith(suffix)) return null;
+	const ending = `.${oldExtension.toLowerCase()}`;
+	if (!target.toLowerCase().endsWith(ending)) return null;
 
-	const retargeted = target.slice(0, target.length - suffix.length) + `.${newExtension}`;
+	const stem = target.slice(0, target.length - ending.length);
+	const retargeted = `${stem}${suffix}.${newExtension}`;
 	return original.slice(0, bounds.start) + retargeted + original.slice(bounds.end);
 }
 
@@ -80,7 +89,8 @@ function targetBounds(original: string): { start: number; end: number } | null {
 export function findReferences(
 	index: LinkIndex,
 	file: TFile,
-	newExtension: string
+	newExtension: string,
+	suffix = ""
 ): Reference[] {
 	const references: Reference[] = [];
 	const seen = new Set<string>();
@@ -89,7 +99,12 @@ export function findReferences(
 		const key = `${occurrence.notePath}\u0000${occurrence.original}`;
 		if (seen.has(key)) continue;
 
-		const replacement = retargetExtension(occurrence.original, file.extension, newExtension);
+		const replacement = retargetLink(
+			occurrence.original,
+			file.extension,
+			newExtension,
+			suffix
+		);
 		if (!replacement) continue;
 
 		seen.add(key);
@@ -144,7 +159,7 @@ export async function applyReferences(
 				// note names the old file any more, someone else already moved
 				// it and there is nothing left to do.
 				if (after.includes(reference.replacement)) continue;
-				if (!mentions(after, reference.original)) continue;
+				if (!stranded(app, after, reference)) continue;
 				throw new Error(
 					`"${notePath}" still points at ${targetName(reference.original)} ` +
 						`in a form this plugin did not write; it was left alone`
@@ -193,9 +208,47 @@ function targetName(original: string): string {
 	return slash === -1 ? target : target.slice(slash + 1);
 }
 
-/** Whether the note still names the file this link used to point at. */
-function mentions(text: string, original: string): boolean {
-	return text.includes(targetName(original));
+/**
+ * Whether the note is left holding a link that no longer resolves.
+ *
+ * Matching on the filename alone is not enough. A vault can hold two different
+ * images with the same name in different folders, and one note can embed both:
+ *
+ *     ![](.../附件/图片/idea-2.png)   <- the one being converted
+ *     ![](.../附件/idea-2.png)        <- a different file, below the threshold
+ *
+ * Rewriting the first leaves the second untouched and still naming `idea-2.png`,
+ * which an earlier version of this check read as "we failed to move a link" and
+ * refused. It cost 17 conversions in a real vault — no damage, because the
+ * refusal rolls everything back, but no conversion either.
+ *
+ * The precise question is not "is that name still here" but "is anything now
+ * broken". Obsidian's own resolver answers it: by this point the image has been
+ * renamed and the vault index has confirmed it, so a link of that name which
+ * still resolves is pointing at some other file that exists, and is none of our
+ * business. One that resolves to nothing is a link we stranded.
+ */
+function stranded(app: App, text: string, reference: Reference): boolean {
+	const name = targetName(reference.original);
+	for (const occurrence of parseLinks(text, reference.notePath)) {
+		if (lastSegment(occurrence.target) !== name) continue;
+		const target = decodeSafely(occurrence.target);
+		if (!app.metadataCache.getFirstLinkpathDest(target, reference.notePath)) return true;
+	}
+	return false;
+}
+
+function lastSegment(target: string): string {
+	const slash = target.lastIndexOf("/");
+	return slash === -1 ? target : target.slice(slash + 1);
+}
+
+function decodeSafely(value: string): string {
+	try {
+		return decodeURIComponent(value);
+	} catch {
+		return value;
+	}
 }
 
 /** Puts back the notes already written when a later one could not be. */

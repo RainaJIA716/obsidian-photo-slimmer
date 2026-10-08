@@ -84,20 +84,14 @@ export async function replaceWithWebp(
 	mode: OriginalHandling,
 	internal: InternalWrites,
 	index: LinkIndex
-): Promise<void> {
+): Promise<WebpTarget> {
 	const originalPath = file.path;
-	const targetPath = webpPath(file);
-
-	if (app.vault.getAbstractFileByPath(targetPath)) {
-		throw new ReplaceFailure(
-			originalPath,
-			new Error(`"${targetPath}" already exists, so this one was left alone`)
-		);
-	}
+	const target = webpTarget(app, file);
+	const targetPath = target.path;
 
 	// Read before anything changes: this is what makes the rollback exact.
 	const originalBytes = await app.vault.readBinary(file);
-	const references = findReferences(index, file, OUTPUT_EXTENSION);
+	const references = findReferences(index, file, OUTPUT_EXTENSION, target.suffix);
 
 	let stash: Stash | null = null;
 	if (mode === "trash") {
@@ -154,6 +148,7 @@ export async function replaceWithWebp(
 	}
 
 	if (stash) await trashStash(app, stash);
+	return target;
 }
 
 /** A copy of an original, parked outside the vault's namespace. */
@@ -233,9 +228,43 @@ async function removeFolder(adapter: DataAdapter, path: string): Promise<void> {
 	}
 }
 
-/** Where a compressed image goes: same folder, same name, `.webp`. */
-export function webpPath(file: TFile): string {
-	return `${folderPrefix(file)}${file.basename}.${OUTPUT_EXTENSION}`;
+export interface WebpTarget {
+	/** Vault path the image will have once converted. */
+	path: string;
+	/** Added to the name to make it free, e.g. `-1`; empty when it was free already. */
+	suffix: string;
+}
+
+/**
+ * Where a compressed image goes: same folder, same name, `.webp` — or, when
+ * that name is taken, the same name with `-1`, `-2`… appended.
+ *
+ * Taken is not hypothetical, it is the normal state of an older vault. Paste
+ * renamers number new attachments by checking only the exact name they are
+ * about to write, so once `photo-3.png` has become `photo-3.webp` the name
+ * `photo-3.png` looks free, and the next pasted image gets it. A real vault
+ * had a hundred such pairs: two different pictures, both linked, sharing a
+ * stem. Skipping them meant they could never be converted, and every new
+ * conversion freed another name for the next paste to reuse.
+ *
+ * The name has to be free across the whole vault, not just in this folder.
+ * A shortest-form link such as `![[photo-3.webp]]` resolves by name alone; give
+ * a second file in another folder that name and the link has two candidates,
+ * at which point Obsidian rewrites links in unrelated notes to disambiguate.
+ * Case is ignored throughout, because the disk underneath usually does too.
+ *
+ * The suffix is plain ASCII on purpose: links are retargeted by appending it to
+ * the stem as written, and anything that needed percent-encoding would break
+ * an encoded markdown link.
+ */
+export function webpTarget(app: App, file: TFile): WebpTarget {
+	const taken = new Set(app.vault.getFiles().map((other) => other.name.toLowerCase()));
+	const folder = folderPrefix(file);
+	for (let n = 0; ; n++) {
+		const suffix = n === 0 ? "" : `-${n}`;
+		const name = `${file.basename}${suffix}.${OUTPUT_EXTENSION}`;
+		if (!taken.has(name.toLowerCase())) return { path: `${folder}${name}`, suffix };
+	}
 }
 
 /**
