@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" width="1000" height="700" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+  <style>
+    .card{fill:#fdfcfa;stroke:#e3ddd2;stroke-width:1.5}
+    .head{fill:#efe9dd}
+    .t{fill:#2f2a24}.m{fill:#8b8177}.accent{fill:#8a7355}
+    .big{font-size:22px;font-weight:600}
+    .h{font-size:15px;font-weight:600}
+    .b{font-size:12.5px}.s{font-size:11px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+    .ms{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}
+    .step{font-size:10.5px;font-weight:700;letter-spacing:.12em}
+    .ok{fill:#4b7a4e}.warn{fill:#a4553a}
+    .okbox{fill:#f1f6ef;stroke:#b9d0b4}
+    .warnbox{fill:#fbf1ec;stroke:#e5c3b4}
+    .row{fill:#fff;stroke:#ded7ca}
+    .faded{fill:#f4f1ec;stroke:#e6e0d6}
+  </style>
+  <defs>
+    <marker id="ar" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 .5 L8 4 L0 7.5z" fill="#8a7355"/></marker>
+  </defs>
+  <rect width="1000" height="700" fill="#fff"/>
+
+  <text class="t" x="30" y="42" font-size="19" font-weight="600">Photo Slimmer 2.1.0 — what changed</text>
+  <text class="b m" x="30" y="64">Most of the images 2.0.0 left alone run after run now convert. Measured on the vault that prompted it:</text>
+
+  <text class="big t" x="30" y="106">203 → 13</text><text class="s m" x="30" y="123">images left alone</text>
+  <text class="big ok" x="210" y="106">+190</text><text class="s m" x="210" y="123">more converted</text>
+  <text class="big t" x="350" y="106">143 MB</text><text class="s m" x="350" y="123">saved</text>
+  <text class="big t" x="490" y="106">0</text><text class="s m" x="490" y="123">broken links</text>
+
+  <!-- 1. taken name -->
+  <rect x="30" y="148" width="300" height="322" rx="11" class="card"/>
+  <text class="step accent" x="48" y="176">1 · NAME ALREADY TAKEN</text>
+  <text class="h t" x="48" y="198">A taken name no longer blocks it</text>
+  <text class="b m" x="48" y="220">A paste renamer gave the old .png name</text>
+  <text class="b m" x="48" y="237">to a new, different picture.</text>
+
+  <rect x="48" y="252" width="264" height="56" rx="7" fill="#faf8f4" stroke="#ece7de"/>
+  <text class="mono t" x="60" y="275">photo-3.webp</text><text class="s m" x="300" y="275" text-anchor="end">converted earlier</text>
+  <text class="mono t" x="60" y="297">photo-3.png</text><text class="s m" x="300" y="297" text-anchor="end">pasted later</text>
+
+  <text class="step m" x="48" y="334">2.0.0</text>
+  <rect x="48" y="342" width="264" height="28" rx="6" class="warnbox"/>
+  <text class="s warn" x="60" y="360">✕  skipped: “photo-3.webp” already exists</text>
+
+  <text class="step m" x="48" y="394">2.1.0</text>
+  <rect x="48" y="402" width="264" height="44" rx="6" class="okbox"/>
+  <text class="mono t" x="60" y="420">photo-3.png</text>
+  <path d="M146 416 H166" stroke="#8a7355" stroke-width="1.5" fill="none" marker-end="url(#ar)"/>
+  <text class="mono ok" x="174" y="420">photo-3-1.webp</text>
+  <text class="s m" x="60" y="437">links moved; the name is unused vault-wide</text>
+
+  <!-- 2. quality -->
+  <rect x="350" y="148" width="300" height="322" rx="11" class="card"/>
+  <text class="step accent" x="368" y="176">2 · WOULD NOT GET SMALLER</text>
+  <text class="h t" x="368" y="198">JPEGs and screenshots shrink</text>
+  <text class="b m" x="368" y="220">A JPEG is already lossy: at quality 90 its</text>
+  <text class="b m" x="368" y="237">WebP often came out bigger.</text>
+
+  <text class="mono t" x="368" y="264">photo.jpeg</text>
+  <text class="s m" x="368" y="284">original</text>
+  <rect x="440" y="275" width="127" height="11" rx="3" fill="#c9c1b4"/>
+  <text class="s m" x="573" y="284">476 KB</text>
+  <text class="s m" x="368" y="302">q90 · 2.0.0</text>
+  <rect x="440" y="293" width="150" height="11" rx="3" fill="#d79c84"/>
+  <text class="s warn" x="596" y="302">564 KB</text>
+  <text class="s t" x="368" y="320">q80 · 2.1.0</text>
+  <rect x="440" y="311" width="81" height="11" rx="3" fill="#7fa77a"/>
+  <text class="s ok" x="527" y="320">304 KB  −36%</text>
+
+  <text class="mono t" x="368" y="352">screenshot.png</text>
+  <text class="s m" x="368" y="372">original</text>
+  <rect x="440" y="363" width="150" height="11" rx="3" fill="#c9c1b4"/>
+  <text class="s m" x="596" y="372">323 KB</text>
+  <text class="s m" x="368" y="390">lossy q90</text>
+  <text class="s warn" x="440" y="390">no smaller</text>
+  <text class="s t" x="368" y="408">lossless</text>
+  <rect x="440" y="399" width="53" height="11" rx="3" fill="#7fa77a"/>
+  <text class="s ok" x="499" y="408">114 KB  −65%</text>
+
+  <line x1="368" y1="426" x2="632" y2="426" stroke="#ece7de"/>
+  <text class="s m" x="368" y="444">JPEG gets its own setting, 80 by default.</text>
+  <text class="s m" x="368" y="459">A PNG retries losslessly — pixel-identical.</text>
+
+  <!-- 3. stalled run -->
+  <rect x="670" y="148" width="300" height="322" rx="11" class="card"/>
+  <text class="step accent" x="688" y="176">3 · CAPPED RUNS</text>
+  <text class="h t" x="688" y="198">A capped run no longer stalls</text>
+  <text class="b m" x="688" y="220">Biggest first, N per run. If the top N</text>
+  <text class="b m" x="688" y="237">can't shrink, every run converted 0.</text>
+
+  <text class="step m" x="688" y="264">2.0.0</text>
+  <text class="step m" x="832" y="264">2.1.0</text>
+
+  <!-- 2.0.0 column: cap stuck on the same rows -->
+  <rect x="688" y="272" width="110" height="18" rx="4" class="warnbox"/><text class="s warn" x="696" y="285">✕ no smaller</text>
+  <rect x="688" y="294" width="110" height="18" rx="4" class="warnbox"/><text class="s warn" x="696" y="307">✕ no smaller</text>
+  <rect x="688" y="316" width="110" height="18" rx="4" class="warnbox"/><text class="s warn" x="696" y="329">✕ no smaller</text>
+  <rect x="688" y="338" width="110" height="18" rx="4" class="row"/><text class="s m" x="696" y="351">not reached</text>
+  <rect x="688" y="360" width="110" height="18" rx="4" class="row"/><text class="s m" x="696" y="373">not reached</text>
+  <rect x="682" y="267" width="122" height="72" rx="6" fill="none" stroke="#a4553a" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text class="s warn" x="688" y="396">same N every run</text>
+
+  <!-- 2.1.0 column: remembered rows skipped, cap moves on -->
+  <rect x="832" y="272" width="120" height="18" rx="4" class="faded"/><text class="s m" x="840" y="285" opacity=".7">remembered</text>
+  <rect x="832" y="294" width="120" height="18" rx="4" class="faded"/><text class="s m" x="840" y="307" opacity=".7">remembered</text>
+  <rect x="832" y="316" width="120" height="18" rx="4" class="faded"/><text class="s m" x="840" y="329" opacity=".7">remembered</text>
+  <rect x="832" y="338" width="120" height="18" rx="4" class="okbox"/><text class="s ok" x="840" y="351">✓ converted</text>
+  <rect x="832" y="360" width="120" height="18" rx="4" class="okbox"/><text class="s ok" x="840" y="373">✓ converted</text>
+  <rect x="826" y="333" width="132" height="50" rx="6" fill="none" stroke="#4b7a4e" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text class="s ok" x="832" y="396">cap reaches new ones</text>
+
+  <line x1="688" y1="426" x2="952" y2="426" stroke="#ece7de"/>
+  <text class="s m" x="688" y="444">Back once the image or quality changes, or</text>
+  <text class="s m" x="688" y="459">via “Retry images left alone earlier”.</text>
+
+  <!-- 4. report -->
+  <rect x="30" y="492" width="940" height="178" rx="11" class="card"/>
+  <text class="step accent" x="48" y="520">4 · REPORT</text>
+  <text class="h t" x="48" y="542">Grouped by reason, in words you can act on</text>
+
+  <text class="step m" x="48" y="574">2.0.0</text>
+  <rect x="48" y="582" width="430" height="72" rx="7" fill="#faf8f4" stroke="#ece7de"/>
+  <text class="ms t" x="60" y="602">scan-9.png</text><text class="ms warn" x="150" y="602">InvalidStateError: The source image…</text>
+  <text class="ms t" x="60" y="620">photo-3.png</text><text class="ms m" x="150" y="620">“photo-3.webp” already exists</text>
+  <text class="ms t" x="60" y="638">old-1.jpeg</text><text class="ms m" x="150" y="638">the WebP came out no smaller</text>
+  <text class="s m" x="466" y="638" text-anchor="end">…203 lines, mixed</text>
+
+  <path d="M488 618 H512" stroke="#8a7355" stroke-width="1.6" fill="none" marker-end="url(#ar)"/>
+
+  <text class="step m" x="522" y="574">2.1.0</text>
+  <rect x="522" y="582" width="430" height="72" rx="7" fill="#fff" stroke="#8a7355"/>
+  <text class="b warn" x="534" y="602">Not really the format its name says (2)</text>
+  <text class="ms t" x="546" y="620">scan-9.png</text><text class="s m" x="940" y="620" text-anchor="end">really a TIFF named .png</text>
+  <text class="b warn" x="534" y="642">Would not get smaller (11)  ▸</text>
+  <text class="b t" x="760" y="642">Compressed (187)  ▸</text>
+</svg>
